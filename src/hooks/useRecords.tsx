@@ -14,6 +14,7 @@ export type Record = {
   completed_status: boolean;
   completed_at: string | null;
   updated_at: string;
+  file_url: string | null;
 };
 
 export type RecordInsert = {
