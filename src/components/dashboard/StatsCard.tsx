@@ -1,5 +1,4 @@
 import { LucideIcon } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface StatsCardProps {
@@ -8,41 +7,79 @@ interface StatsCardProps {
   subtitle?: string;
   icon: LucideIcon;
   variant?: 'default' | 'success' | 'warning' | 'destructive' | 'info';
+  trend?: {
+    value: number;
+    isPositive: boolean;
+  };
 }
 
-export function StatsCard({ title, value, subtitle, icon: Icon, variant = 'default' }: StatsCardProps) {
+export function StatsCard({ title, value, subtitle, icon: Icon, variant = 'default', trend }: StatsCardProps) {
   const variants = {
-    default: 'from-primary/10 to-primary/5 text-primary',
-    success: 'from-success/10 to-success/5 text-success',
-    warning: 'from-warning/10 to-warning/5 text-warning',
-    destructive: 'from-destructive/10 to-destructive/5 text-destructive',
-    info: 'from-info/10 to-info/5 text-info',
+    default: {
+      bg: 'bg-card',
+      icon: 'bg-primary/10 text-primary',
+      border: 'border-border',
+    },
+    success: {
+      bg: 'bg-card',
+      icon: 'bg-success/10 text-success',
+      border: 'border-success/20',
+    },
+    warning: {
+      bg: 'bg-card',
+      icon: 'bg-warning/10 text-warning',
+      border: 'border-warning/20',
+    },
+    destructive: {
+      bg: 'bg-card',
+      icon: 'bg-destructive/10 text-destructive',
+      border: 'border-destructive/20',
+    },
+    info: {
+      bg: 'bg-card',
+      icon: 'bg-info/10 text-info',
+      border: 'border-info/20',
+    },
   };
 
-  const iconVariants = {
-    default: 'bg-primary text-primary-foreground',
-    success: 'bg-success text-success-foreground',
-    warning: 'bg-warning text-warning-foreground',
-    destructive: 'bg-destructive text-destructive-foreground',
-    info: 'bg-info text-info-foreground',
-  };
+  const style = variants[variant];
 
   return (
-    <Card className={cn('bg-gradient-to-br border-none shadow-md', variants[variant])}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold text-foreground">{value}</p>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
+    <div className={cn(
+      'relative overflow-hidden rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5',
+      style.bg,
+      style.border
+    )}>
+      {/* Background decoration */}
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-primary/5 to-transparent" />
+      
+      <div className="relative flex items-start justify-between">
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">
+            {title}
+          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-4xl font-bold tracking-tight text-foreground">{value}</p>
+            {trend && (
+              <span className={cn(
+                'text-sm font-medium',
+                trend.isPositive ? 'text-success' : 'text-destructive'
+              )}>
+                {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+              </span>
             )}
           </div>
-          <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl', iconVariants[variant])}>
-            <Icon className="h-6 w-6" />
-          </div>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
         </div>
-      </CardContent>
-    </Card>
+        <div className={cn(
+          'flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-300 hover:scale-105',
+          style.icon
+        )}>
+          <Icon className="h-7 w-7" strokeWidth={1.5} />
+        </div>
+      </div>
+    </div>
   );
 }
