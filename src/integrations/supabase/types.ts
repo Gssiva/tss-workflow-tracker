@@ -77,6 +77,7 @@ export type Database = {
           created_by: string
           description: string | null
           expected_time_hours: number
+          file_url: string | null
           id: string
           title: string
           updated_at: string
@@ -89,6 +90,7 @@ export type Database = {
           created_by: string
           description?: string | null
           expected_time_hours: number
+          file_url?: string | null
           id?: string
           title: string
           updated_at?: string
@@ -101,6 +103,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           expected_time_hours?: number
+          file_url?: string | null
           id?: string
           title?: string
           updated_at?: string

@@ -1,18 +1,20 @@
-import { Clock, CheckCircle2, AlertTriangle, Calendar, Edit2 } from 'lucide-react';
+import { Clock, CheckCircle2, AlertTriangle, Calendar, Edit2, FileText, ExternalLink } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Record } from '@/hooks/useRecords';
+import { UploadDocumentDialog } from './UploadDocumentDialog';
 
 interface RecordCardProps {
-  record: Record;
+  record: Record & { file_url?: string | null };
   onComplete?: () => void;
   onEdit?: () => void;
   showUser?: boolean;
+  showUpload?: boolean;
 }
 
-export function RecordCard({ record, onComplete, onEdit, showUser }: RecordCardProps) {
+export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = true }: RecordCardProps) {
   const isBreached = record.breach_status;
   const isCompleted = record.completed_status;
 
@@ -75,18 +77,42 @@ export function RecordCard({ record, onComplete, onEdit, showUser }: RecordCardP
             <Calendar className="h-3 w-3" />
             <span>{format(new Date(record.created_at), 'PPP')}</span>
           </div>
-          {!isCompleted && (
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <Button size="sm" onClick={onComplete} className="gradient-primary text-primary-foreground">
-                <CheckCircle2 className="mr-1 h-4 w-4" />
-                Mark Complete
-              </Button>
-              <Button size="sm" variant="outline" onClick={onEdit}>
-                <Edit2 className="mr-1 h-4 w-4" />
-                Edit
+
+          {/* Document Attachment Section */}
+          {record.file_url && (
+            <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground flex-1">Document attached</span>
+              <Button variant="ghost" size="sm" className="h-7 gap-1 text-primary" asChild>
+                <a href={record.file_url} target="_blank" rel="noopener noreferrer">
+                  View <ExternalLink className="h-3 w-3" />
+                </a>
               </Button>
             </div>
           )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 pt-2 border-t flex-wrap">
+            {!isCompleted && (
+              <>
+                <Button size="sm" onClick={onComplete} className="gradient-primary text-primary-foreground">
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                  Mark Complete
+                </Button>
+                <Button size="sm" variant="outline" onClick={onEdit}>
+                  <Edit2 className="mr-1 h-4 w-4" />
+                  Edit
+                </Button>
+              </>
+            )}
+            {showUpload && (
+              <UploadDocumentDialog 
+                recordId={record.id} 
+                recordTitle={record.title}
+                currentFileUrl={record.file_url}
+              />
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
