@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Users, Loader2 } from 'lucide-react';
+import { Users, Loader2, UserPlus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUsers } from '@/hooks/useUsers';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
@@ -114,28 +115,35 @@ export function AssignTaskDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gradient-primary text-primary-foreground">
-          <Users className="mr-2 h-4 w-4" />
-          Assign Task to Users
+        <Button size="sm" className="gap-1.5">
+          <UserPlus className="h-4 w-4" />
+          <span className="hidden sm:inline">Bulk Assign</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Assign Task to Users</DialogTitle>
-          <DialogDescription>
-            Create a task and assign it to multiple users at once
+      <DialogContent className="max-w-md">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Assign Task to Users
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            Create and assign a task to multiple users at once
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Task Title</FormLabel>
+                  <FormLabel className="text-xs">Task Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter task title..." {...field} />
+                    <Input 
+                      placeholder="Enter task title..." 
+                      className="h-9 text-sm"
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,11 +154,11 @@ export function AssignTaskDialog() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-xs">Description (optional)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Enter task description..."
-                      className="resize-none"
+                      className="resize-none h-16 text-sm"
                       {...field}
                     />
                   </FormControl>
@@ -163,11 +171,11 @@ export function AssignTaskDialog() {
               name="expected_time_hours"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expected Time (hours)</FormLabel>
+                  <FormLabel className="text-xs">Expected Time</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select expected time" />
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select time" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -176,6 +184,8 @@ export function AssignTaskDialog() {
                       <SelectItem value="3">3 hours</SelectItem>
                       <SelectItem value="5">5 hours</SelectItem>
                       <SelectItem value="8">8 hours</SelectItem>
+                      <SelectItem value="12">12 hours</SelectItem>
+                      <SelectItem value="24">24 hours</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -183,41 +193,56 @@ export function AssignTaskDialog() {
               )}
             />
 
-            {/* User Selection */}
+            {/* Compact User Selection */}
             <div className="space-y-2">
-              <FormLabel>Assign To</FormLabel>
-              <div className="border rounded-lg p-3">
-                <div className="flex items-center gap-2 pb-2 border-b mb-2">
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-xs">Assign To</FormLabel>
+                {selectedUsers.length > 0 && (
+                  <Badge variant="secondary" className="text-xs px-2 py-0">
+                    {selectedUsers.length} selected
+                  </Badge>
+                )}
+              </div>
+              <div className="border rounded-md bg-muted/30">
+                <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/50">
                   <Checkbox
                     id="select-all"
                     checked={selectedUsers.length === regularUsers.length && regularUsers.length > 0}
                     onCheckedChange={(checked) => handleSelectAll(!!checked)}
                   />
-                  <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                    Select All Users ({regularUsers.length})
+                  <label htmlFor="select-all" className="text-xs font-medium cursor-pointer">
+                    Select All ({regularUsers.length} users)
                   </label>
                 </div>
-                <ScrollArea className="h-[150px]">
+                <ScrollArea className="h-32">
                   {isLoadingUsers ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     </div>
                   ) : regularUsers.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
+                    <p className="text-xs text-muted-foreground text-center py-4">
                       No users available
                     </p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="p-2 space-y-1">
                       {regularUsers.map((user) => (
-                        <div key={user.id} className="flex items-center gap-2">
+                        <div 
+                          key={user.id} 
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-muted/50 cursor-pointer transition-colors ${
+                            selectedUsers.includes(user.id) ? 'bg-primary/10' : ''
+                          }`}
+                          onClick={() => handleUserToggle(user.id, !selectedUsers.includes(user.id))}
+                        >
                           <Checkbox
                             id={user.id}
                             checked={selectedUsers.includes(user.id)}
                             onCheckedChange={(checked) => handleUserToggle(user.id, !!checked)}
                           />
-                          <label htmlFor={user.id} className="text-sm cursor-pointer flex-1">
-                            <span className="font-medium">{user.full_name || 'Unnamed'}</span>
-                            <span className="text-muted-foreground ml-2">({user.email})</span>
+                          <label htmlFor={user.id} className="text-xs cursor-pointer flex-1 truncate">
+                            <span className="font-medium">{user.full_name || user.email.split('@')[0]}</span>
+                            <span className="text-muted-foreground ml-1 hidden sm:inline">
+                              ({user.email})
+                            </span>
                           </label>
                         </div>
                       ))}
@@ -225,25 +250,32 @@ export function AssignTaskDialog() {
                   )}
                 </ScrollArea>
               </div>
-              {selectedUsers.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {selectedUsers.length} user(s) selected
-                </p>
-              )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || selectedUsers.length === 0}>
+              <Button 
+                type="submit" 
+                size="sm"
+                disabled={isSubmitting || selectedUsers.length === 0}
+              >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
                     Assigning...
                   </>
                 ) : (
-                  `Assign to ${selectedUsers.length} User(s)`
+                  <>
+                    <UserPlus className="mr-1.5 h-3 w-3" />
+                    Assign Task
+                  </>
                 )}
               </Button>
             </div>
