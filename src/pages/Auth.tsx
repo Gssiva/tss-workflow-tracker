@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { FileText, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import companyLogo from '@/assets/company-logo.png';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -141,10 +142,12 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary mb-4">
-            <FileText className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Project Tracker</h1>
+          <img 
+            src={companyLogo} 
+            alt="TSS Logo" 
+            className="h-16 w-16 rounded-2xl mb-4 object-contain"
+          />
+          <h1 className="text-2xl font-bold text-foreground">TSS Tracker</h1>
           <p className="text-muted-foreground">Track your projects with SLA monitoring</p>
         </div>
 

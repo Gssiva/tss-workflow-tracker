@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { FileText, ArrowRight, BarChart3, Clock, Shield } from 'lucide-react';
+import { ArrowRight, BarChart3, Clock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import companyLogo from '@/assets/company-logo.png';
 
 export default function Index() {
   const { user, role, loading } = useAuth();
@@ -22,11 +23,13 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background" />
         <div className="container mx-auto px-6 py-24 relative text-center">
           <div className="flex justify-center mb-8">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl gradient-primary shadow-2xl">
-              <FileText className="h-10 w-10 text-primary-foreground" />
-            </div>
+            <img 
+              src={companyLogo} 
+              alt="TSS Logo" 
+              className="h-24 w-24 rounded-3xl shadow-2xl object-contain"
+            />
           </div>
-          <h1 className="text-5xl font-bold text-foreground mb-6">Project Tracker</h1>
+          <h1 className="text-5xl font-bold text-foreground mb-6">TSS Tracker</h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Track your projects with automatic SLA monitoring. Know when tasks breach their expected completion time.</p>
           <Button size="lg" className="gradient-primary text-lg px-8" onClick={() => navigate('/auth')}>Get Started <ArrowRight className="ml-2 h-5 w-5" /></Button>
         </div>

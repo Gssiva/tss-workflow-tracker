@@ -1,4 +1,4 @@
-import { Home, FileText, Users, BarChart3, LogOut } from 'lucide-react';
+import { Home, FileText, Users, BarChart3, LogOut, Settings } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -14,6 +14,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
+import companyLogo from '@/assets/company-logo.png';
 
 export function AppSidebar() {
   const { role, signOut, user } = useAuth();
@@ -45,11 +47,13 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-            <FileText className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img 
+            src={companyLogo} 
+            alt="TSS Logo" 
+            className="h-10 w-10 rounded-xl object-contain"
+          />
           <div>
-            <h2 className="font-bold text-sidebar-foreground">Project Tracker</h2>
+            <h2 className="font-bold text-sidebar-foreground">TSS Tracker</h2>
             <p className="text-xs text-muted-foreground capitalize">{role || 'User'}</p>
           </div>
         </div>
@@ -82,6 +86,14 @@ export function AppSidebar() {
           <div className="text-sm">
             <p className="font-medium text-sidebar-foreground truncate">{user?.email}</p>
           </div>
+          <EditProfileDialog 
+            trigger={
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                <Settings className="h-4 w-4" />
+                Edit Profile
+              </Button>
+            }
+          />
           <Button
             variant="outline"
             size="sm"
