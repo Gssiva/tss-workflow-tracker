@@ -1,11 +1,12 @@
-import { Clock, CheckCircle2, AlertTriangle, Calendar, Edit2, FileText, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Clock, CheckCircle2, AlertTriangle, Calendar, Edit2, FileText, ExternalLink, Loader2 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Record } from '@/hooks/useRecords';
 import { UploadDocumentDialog } from './UploadDocumentDialog';
-
+import { supabase } from '@/integrations/supabase/client';
 interface RecordCardProps {
   record: Record & { file_url?: string | null };
   onComplete?: () => void;
@@ -15,9 +16,37 @@ interface RecordCardProps {
 }
 
 export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = true }: RecordCardProps) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loadingUrl, setLoadingUrl] = useState(false);
   const isBreached = record.breach_status;
   const isCompleted = record.completed_status;
 
+  // Generate signed URL when file_url exists
+  useEffect(() => {
+    const getSignedUrl = async () => {
+      if (!record.file_url) {
+        setSignedUrl(null);
+        return;
+      }
+      
+      setLoadingUrl(true);
+      try {
+        const { data, error } = await supabase.storage
+          .from('record-documents')
+          .createSignedUrl(record.file_url, 3600); // 1 hour expiry
+        
+        if (error) throw error;
+        setSignedUrl(data.signedUrl);
+      } catch (error) {
+        console.error('Error getting signed URL:', error);
+        setSignedUrl(null);
+      } finally {
+        setLoadingUrl(false);
+      }
+    };
+
+    getSignedUrl();
+  }, [record.file_url]);
   const getStatusBadge = () => {
     if (isCompleted) {
       return (
@@ -83,11 +112,15 @@ export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = 
             <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
               <FileText className="h-4 w-4 text-primary" />
               <span className="text-sm text-muted-foreground flex-1">Document attached</span>
-              <Button variant="ghost" size="sm" className="h-7 gap-1 text-primary" asChild>
-                <a href={record.file_url} target="_blank" rel="noopener noreferrer">
-                  View <ExternalLink className="h-3 w-3" />
-                </a>
-              </Button>
+              {loadingUrl ? (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              ) : signedUrl ? (
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-primary" asChild>
+                  <a href={signedUrl} target="_blank" rel="noopener noreferrer">
+                    View <ExternalLink className="h-3 w-3" />
+                  </a>
+                </Button>
+              ) : null}
             </div>
           )}
 

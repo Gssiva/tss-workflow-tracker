@@ -59,13 +59,10 @@ export function UploadDocumentDialog({ recordId, recordTitle, currentFileUrl }: 
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('record-documents')
-        .getPublicUrl(fileName);
-
+      // Store the file path instead of public URL (bucket is now private)
       const { error: updateError } = await supabase
         .from('records')
-        .update({ file_url: publicUrl })
+        .update({ file_url: fileName })
         .eq('id', recordId);
 
       if (updateError) throw updateError;
@@ -151,9 +148,6 @@ export function UploadDocumentDialog({ recordId, recordTitle, currentFileUrl }: 
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <FileText className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground flex-1">Current document attached</span>
-              <Button variant="link" size="sm" className="h-auto p-0" asChild>
-                <a href={currentFileUrl} target="_blank" rel="noopener noreferrer">View</a>
-              </Button>
             </div>
           )}
         </div>
