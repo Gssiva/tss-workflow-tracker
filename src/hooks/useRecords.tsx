@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 export type Record = {
   id: string;
@@ -35,6 +36,20 @@ export function useRecords() {
   const { user, role } = useAuth();
   const queryClient = useQueryClient();
 
+  const trackActivity = useCallback(async (action: string, details?: { record_id?: string; title?: string }) => {
+    if (!user) return;
+    try {
+      await supabase.from('user_activity_logs').insert([{
+        user_id: user.id,
+        action,
+        page: window.location.pathname,
+        details: JSON.parse(JSON.stringify(details || {})),
+      }]);
+    } catch (error) {
+      // Silently fail
+    }
+  }, [user]);
+
   const recordsQuery = useQuery({
     queryKey: ['records', user?.id, role],
     queryFn: async () => {
@@ -65,8 +80,9 @@ export function useRecords() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['records'] });
+      trackActivity('record_created', { record_id: data.id, title: data.title });
       toast.success('Record created successfully');
     },
     onError: (error) => {
@@ -86,8 +102,9 @@ export function useRecords() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['records'] });
+      trackActivity('record_edited', { record_id: data.id, title: data.title });
       toast.success('Record updated successfully');
     },
     onError: (error) => {
@@ -110,8 +127,9 @@ export function useRecords() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['records'] });
+      trackActivity('record_completed', { record_id: data.id, title: data.title });
       toast.success('Record marked as complete');
     },
     onError: (error) => {

@@ -1,4 +1,4 @@
-import { Home, FileText, Users, BarChart3, LogOut, Settings } from 'lucide-react';
+import { Home, FileText, Users, BarChart3, LogOut, Settings, Activity } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -33,6 +33,7 @@ export function AppSidebar() {
     { title: 'Dashboard', icon: Home, path: '/admin' },
     { title: 'All Records', icon: FileText, path: '/admin/records' },
     { title: 'Users', icon: Users, path: '/admin/users' },
+    { title: 'User Activity', icon: Activity, path: '/admin/activity' },
     { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   ];
 

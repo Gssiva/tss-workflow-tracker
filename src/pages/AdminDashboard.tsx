@@ -1,6 +1,7 @@
 import { FileText, Users, CheckCircle2, AlertTriangle, Clock, TrendingUp, Activity, ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { UserActivityCard } from '@/components/dashboard/UserActivityCard';
 import { useRecords } from '@/hooks/useRecords';
 import { useUsers } from '@/hooks/useUsers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const { records, isLoading: recordsLoading } = useRecords();
   const { users, isLoadingUsers } = useUsers();
 
@@ -137,13 +139,20 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* User Activity - Full Width */}
+        <UserActivityCard 
+          limit={10} 
+          showViewAll={true} 
+          onViewAll={() => navigate('/admin/activity')} 
+        />
+
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Recent Activity */}
+          {/* Recent Records */}
           <Card className="border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                <Activity className="h-5 w-5 text-primary" />
-                Recent Activity
+                <FileText className="h-5 w-5 text-primary" />
+                Recent Records
               </CardTitle>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/admin/records" className="text-primary hover:text-primary/80">
@@ -155,7 +164,7 @@ export default function AdminDashboard() {
               {recentRecords.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <FileText className="h-12 w-12 text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground text-sm">No recent activity</p>
+                  <p className="text-muted-foreground text-sm">No recent records</p>
                 </div>
               ) : (
                 <div className="space-y-1">

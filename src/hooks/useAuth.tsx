@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -73,11 +73,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const trackActivity = useCallback(async (userId: string, action: string) => {
+    try {
+      await supabase.from('user_activity_logs').insert({
+        user_id: userId,
+        action,
+        page: window.location.pathname,
+        details: {},
+      });
+    } catch (error) {
+      // Silently fail - tracking shouldn't break auth
+    }
+  }, []);
+
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    if (!error && data.user) {
+      trackActivity(data.user.id, 'login');
+    }
+    
     return { error };
   };
 
@@ -98,6 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (user) {
+      await trackActivity(user.id, 'logout');
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
