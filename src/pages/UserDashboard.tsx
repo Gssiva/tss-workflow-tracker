@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { FileText, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
+import { FileText, CheckCircle2, AlertTriangle, Clock, Image as ImageIcon } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RecordCard } from '@/components/records/RecordCard';
 import { CreateRecordDialog } from '@/components/records/CreateRecordDialog';
 import { EditRecordDialog } from '@/components/records/EditRecordDialog';
+import { DailyWorkUploadDialog } from '@/components/dailywork/DailyWorkUploadDialog';
 import { useRecords, Record } from '@/hooks/useRecords';
+import { useDailyWorkUploads } from '@/hooks/useDailyWorkUploads';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function UserDashboard() {
   const { records, isLoading, markComplete } = useRecords();
+  const { hasUploadedToday, todayUpload } = useDailyWorkUploads();
   const [editingRecord, setEditingRecord] = useState<Record | null>(null);
 
   const totalRecords = records.length;
@@ -69,7 +73,42 @@ export default function UserDashboard() {
           />
         </div>
 
-        {/* Recent Records */}
+        {/* Daily Work Upload Status */}
+        {!hasUploadedToday ? (
+          <Card className="border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+            <CardContent className="py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <ImageIcon className="h-8 w-8 text-amber-500 shrink-0" />
+                <div className="flex-1">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">
+                    Upload your daily work image
+                  </p>
+                  <p className="text-sm text-amber-600/80 dark:text-amber-500/80">
+                    Don't forget to upload your daily work to track your activity
+                  </p>
+                </div>
+                <DailyWorkUploadDialog />
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-green-500/50 bg-green-50/50 dark:bg-green-950/20">
+            <CardContent className="py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <CheckCircle2 className="h-8 w-8 text-green-500 shrink-0" />
+                <div className="flex-1">
+                  <p className="font-medium text-green-700 dark:text-green-400">
+                    Daily work uploaded!
+                  </p>
+                  <p className="text-sm text-green-600/80 dark:text-green-500/80">
+                    You've already uploaded your work for today
+                  </p>
+                </div>
+                <DailyWorkUploadDialog />
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">Recent Records</h2>

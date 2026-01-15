@@ -15,6 +15,8 @@ import AdminRecords from "./pages/AdminRecords";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminActivity from "./pages/AdminActivity";
+import AdminDailyWork from "./pages/AdminDailyWork";
+import UserDailyWork from "./pages/UserDailyWork";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <UserRecords />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/daily-work"
+              element={
+                <ProtectedRoute>
+                  <UserDailyWork />
                 </ProtectedRoute>
               }
             />
@@ -86,6 +96,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminActivity />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/daily-work"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDailyWork />
                 </ProtectedRoute>
               }
             />
