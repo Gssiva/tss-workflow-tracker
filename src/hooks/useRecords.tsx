@@ -50,6 +50,46 @@ export function useRecords() {
     }
   }, [user]);
 
+  const sendCompletionNotification = useCallback(async (
+    record: { id: string; title: string; description: string | null },
+    completedByEmail: string,
+    completedByName?: string | null
+  ) => {
+    try {
+      // Get admin users to notify
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      if (!adminRoles || adminRoles.length === 0) return;
+
+      // Get admin profiles with emails
+      const { data: adminProfiles } = await supabase
+        .from('profiles')
+        .select('id, email, full_name')
+        .in('id', adminRoles.map(r => r.user_id));
+
+      if (!adminProfiles) return;
+
+      // Send notification to each admin
+      for (const admin of adminProfiles) {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: 'task_completed',
+            recipientEmail: admin.email,
+            recipientName: admin.full_name,
+            taskTitle: record.title,
+            taskDescription: record.description,
+            completedBy: completedByName || completedByEmail,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to send completion notification:', error);
+    }
+  }, []);
+
   const recordsQuery = useQuery({
     queryKey: ['records', user?.id, role],
     queryFn: async () => {
@@ -127,10 +167,21 @@ export function useRecords() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['records'] });
       trackActivity('record_completed', { record_id: data.id, title: data.title });
       toast.success('Record marked as complete');
+
+      // Send notification to admins
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .single();
+        
+        sendCompletionNotification(data, profile?.email || user.email || '', profile?.full_name);
+      }
     },
     onError: (error) => {
       toast.error('Failed to complete record: ' + error.message);
