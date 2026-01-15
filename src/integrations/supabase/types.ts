@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_work_uploads: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          mentioned_users: string[] | null
+          upload_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          mentioned_users?: string[] | null
+          upload_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          mentioned_users?: string[] | null
+          upload_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           accepted_at: string | null

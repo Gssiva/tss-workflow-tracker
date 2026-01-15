@@ -1,4 +1,4 @@
-import { Home, FileText, Users, BarChart3, LogOut, Settings, Activity } from 'lucide-react';
+import { Home, FileText, Users, BarChart3, LogOut, Settings, Activity, Image as ImageIcon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -27,11 +27,13 @@ export function AppSidebar() {
   const userMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/dashboard' },
     { title: 'My Records', icon: FileText, path: '/records' },
+    { title: 'Daily Work', icon: ImageIcon, path: '/daily-work' },
   ];
 
   const adminMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/admin' },
     { title: 'All Records', icon: FileText, path: '/admin/records' },
+    { title: 'Daily Work', icon: ImageIcon, path: '/admin/daily-work' },
     { title: 'Users', icon: Users, path: '/admin/users' },
     { title: 'User Activity', icon: Activity, path: '/admin/activity' },
     { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
