@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Search, Download, CheckCircle2, AlertTriangle, Clock, FileText, ExternalLink } from 'lucide-react';
+import { Search, Download, CheckCircle2, AlertTriangle, Clock, FileText, ExternalLink, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,49 @@ import { useRecords } from '@/hooks/useRecords';
 import { useUsers } from '@/hooks/useUsers';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AssignTaskDialog } from '@/components/records/AssignTaskDialog';
+import { supabase } from '@/integrations/supabase/client';
+
+// Component to handle signed URL fetching for each document
+function DocumentLink({ fileUrl }: { fileUrl: string }) {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getSignedUrl = async () => {
+      try {
+        const { data, error } = await supabase.storage
+          .from('record-documents')
+          .createSignedUrl(fileUrl, 3600);
+        
+        if (error) throw error;
+        setSignedUrl(data.signedUrl);
+      } catch (error) {
+        console.error('Error getting signed URL:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSignedUrl();
+  }, [fileUrl]);
+
+  if (loading) {
+    return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
+  }
+
+  if (!signedUrl) {
+    return <span className="text-muted-foreground text-xs">Error</span>;
+  }
+
+  return (
+    <Button variant="ghost" size="sm" className="h-7 gap-1 text-primary" asChild>
+      <a href={signedUrl} target="_blank" rel="noopener noreferrer">
+        <FileText className="h-3 w-3" />
+        View <ExternalLink className="h-3 w-3" />
+      </a>
+    </Button>
+  );
+}
 
 export default function AdminRecords() {
   const { records, isLoading: recordsLoading } = useRecords();
@@ -183,12 +226,7 @@ export default function AdminRecords() {
                     </TableCell>
                     <TableCell>
                       {record.file_url ? (
-                        <Button variant="ghost" size="sm" className="h-7 gap-1 text-primary" asChild>
-                          <a href={record.file_url} target="_blank" rel="noopener noreferrer">
-                            <FileText className="h-3 w-3" />
-                            View <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </Button>
+                        <DocumentLink fileUrl={record.file_url} />
                       ) : (
                         <span className="text-muted-foreground text-xs">No file</span>
                       )}
