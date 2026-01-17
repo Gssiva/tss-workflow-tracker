@@ -34,8 +34,8 @@ export function AppSidebar() {
     { title: 'Dashboard', icon: Home, path: '/admin' },
     { title: 'All Records', icon: FileText, path: '/admin/records' },
     { title: 'Daily Work', icon: ImageIcon, path: '/admin/daily-work' },
-    { title: 'Users', icon: Users, path: '/admin/users' },
-    { title: 'User Activity', icon: Activity, path: '/admin/activity' },
+    { title: 'Employees', icon: Users, path: '/admin/users' },
+    { title: 'Employee Activity', icon: Activity, path: '/admin/activity' },
     { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   ];
 

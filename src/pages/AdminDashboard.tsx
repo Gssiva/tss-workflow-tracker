@@ -2,6 +2,7 @@ import { FileText, Users, CheckCircle2, AlertTriangle, Clock, TrendingUp, Activi
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { UserActivityCard } from '@/components/dashboard/UserActivityCard';
+import { TeamChatbox } from '@/components/chat/TeamChatbox';
 import { useRecords } from '@/hooks/useRecords';
 import { useUsers } from '@/hooks/useUsers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -92,7 +93,7 @@ export default function AdminDashboard() {
           <StatsCard
             title="Team Members"
             value={totalUsers}
-            subtitle="Active users"
+            subtitle="Active employees"
             icon={Users}
             variant="info"
           />
@@ -230,7 +231,7 @@ export default function AdminDashboard() {
               {userPerformance.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Users className="h-12 w-12 text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground text-sm">No user data available</p>
+                  <p className="text-muted-foreground text-sm">No employee data available</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -266,6 +267,9 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
+      
+      {/* Team Chatbox */}
+      <TeamChatbox />
     </AppLayout>
   );
 }

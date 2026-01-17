@@ -86,25 +86,25 @@ export default function AdminUsers() {
   }
 
   return (
-    <AppLayout title="User Management">
+    <AppLayout title="Employee Management">
       <div className="space-y-8">
-        {/* Users Table */}
+        {/* Employees Table */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Users</CardTitle>
-              <CardDescription>{users.length} registered users</CardDescription>
+              <CardTitle>Employees</CardTitle>
+              <CardDescription>{users.length} registered employees</CardDescription>
             </div>
             <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
               <DialogTrigger asChild>
                 <Button className="gradient-primary">
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Invite User
+                  Invite Employee
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Invite New User</DialogTitle>
+                  <DialogTitle>Invite New Employee</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onInvite)} className="space-y-4">
@@ -141,7 +141,7 @@ export default function AdminUsers() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
+                  <TableHead>Employee</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -151,7 +151,7 @@ export default function AdminUsers() {
                 {users.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      No users yet
+                      No employees yet
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -181,7 +181,7 @@ export default function AdminUsers() {
                           ) : (
                             <UserIcon className="mr-1 h-3 w-3" />
                           )}
-                          {user.role || 'user'}
+                          {user.role === 'admin' ? 'Admin' : 'Employee'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -198,7 +198,7 @@ export default function AdminUsers() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="user">Employee</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>

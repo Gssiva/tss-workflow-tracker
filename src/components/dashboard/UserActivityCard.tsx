@@ -146,7 +146,7 @@ export function UserActivityCard({ limit = 10, showViewAll = true, onViewAll }: 
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <Activity className="h-5 w-5 text-primary" />
-            User Activity
+            Employee Activity
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -171,7 +171,7 @@ export function UserActivityCard({ limit = 10, showViewAll = true, onViewAll }: 
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           <Activity className="h-5 w-5 text-primary" />
-          User Activity
+          Employee Activity
         </CardTitle>
         {showViewAll && onViewAll && (
           <Button variant="ghost" size="sm" onClick={onViewAll} className="text-primary hover:text-primary/80">
