@@ -6,6 +6,7 @@ import { RecordCard } from '@/components/records/RecordCard';
 import { CreateRecordDialog } from '@/components/records/CreateRecordDialog';
 import { EditRecordDialog } from '@/components/records/EditRecordDialog';
 import { DailyWorkUploadDialog } from '@/components/dailywork/DailyWorkUploadDialog';
+import { TeamChatbox } from '@/components/chat/TeamChatbox';
 import { useRecords, Record } from '@/hooks/useRecords';
 import { useDailyWorkUploads } from '@/hooks/useDailyWorkUploads';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -142,6 +143,9 @@ export default function UserDashboard() {
         open={!!editingRecord}
         onOpenChange={(open) => !open && setEditingRecord(null)}
       />
+      
+      {/* Team Chatbox */}
+      <TeamChatbox />
     </AppLayout>
   );
 }

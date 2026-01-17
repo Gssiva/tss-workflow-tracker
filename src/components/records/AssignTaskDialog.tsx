@@ -55,7 +55,7 @@ export function AssignTaskDialog() {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
 
-  // Filter to only show non-admin users (include users with null role as regular users)
+  // Filter to only show non-admin users (employees)
   const regularUsers = users.filter((u) => u.role !== 'admin');
 
   const form = useForm<FormData>({
@@ -94,7 +94,7 @@ export function AssignTaskDialog() {
       const assignerProfile = users.find(u => u.id === currentUser?.id);
       const assignerName = assignerProfile?.full_name || assignerProfile?.email || 'Admin';
       
-      await supabase.functions.invoke('send-notification', {
+      const { data, error } = await supabase.functions.invoke('send-notification', {
         body: {
           type: 'task_assigned',
           recipientEmail: userEmail,
@@ -105,14 +105,50 @@ export function AssignTaskDialog() {
           assignedBy: assignerName,
         },
       });
+      
+      if (error) {
+        console.error('Email notification error:', error);
+        throw error;
+      }
+      
+      console.log('Email notification sent:', data);
     } catch (error) {
       console.error('Failed to send notification email:', error);
+      throw error;
+    }
+  };
+  
+  const sendAdminNotificationEmail = async (
+    taskTitle: string,
+    taskDescription: string | undefined,
+    assignedToNames: string[],
+    expectedTimeHours: number
+  ) => {
+    try {
+      // Get admin users to notify
+      const adminUsers = users.filter(u => u.role === 'admin');
+      
+      for (const admin of adminUsers) {
+        await supabase.functions.invoke('send-notification', {
+          body: {
+            type: 'task_assigned_admin',
+            recipientEmail: admin.email,
+            recipientName: admin.full_name,
+            taskTitle,
+            taskDescription,
+            expectedTimeHours,
+            assignedToNames,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to send admin notification email:', error);
     }
   };
 
   const onSubmit = async (data: FormData) => {
     if (selectedUsers.length === 0) {
-      toast.error('Please select at least one user');
+      toast.error('Please select at least one employee');
       return;
     }
 
@@ -133,10 +169,12 @@ export function AssignTaskDialog() {
         throw error;
       }
 
-      // Send notification emails to all selected users
+      // Send notification emails to all selected employees
+      const assignedNames: string[] = [];
       const emailPromises = selectedUsers.map(async (userId) => {
         const user = regularUsers.find(u => u.id === userId);
         if (user) {
+          assignedNames.push(user.full_name || user.email.split('@')[0]);
           await sendNotificationEmail(
             user.email,
             user.full_name,
@@ -147,11 +185,19 @@ export function AssignTaskDialog() {
         }
       });
 
-      // Don't wait for all emails to complete - fire and forget
-      Promise.all(emailPromises).catch(console.error);
+      // Wait for employee emails, then send admin notification
+      await Promise.all(emailPromises);
+      
+      // Also notify admin about the assignment
+      await sendAdminNotificationEmail(
+        data.title,
+        data.description,
+        assignedNames,
+        parseInt(data.expected_time_hours)
+      );
 
       queryClient.invalidateQueries({ queryKey: ['records'] });
-      toast.success(`Task assigned to ${selectedUsers.length} user(s) successfully. Email notifications sent!`);
+      toast.success(`Task assigned to ${selectedUsers.length} employee(s) successfully. Email notifications sent!`);
       form.reset();
       setSelectedUsers([]);
       setOpen(false);
@@ -289,7 +335,7 @@ export function AssignTaskDialog() {
                         onCheckedChange={(checked) => handleSelectAll(!!checked)}
                       />
                       <span className="font-medium text-sm">
-                        Select All Team Members
+                        Select All Employees
                       </span>
                       {selectedUsers.length === regularUsers.length && regularUsers.length > 0 && (
                         <CheckCircle2 className="h-4 w-4 text-green-500 ml-auto" />
@@ -305,7 +351,7 @@ export function AssignTaskDialog() {
                       ) : regularUsers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
                           <Users className="h-8 w-8 mb-2 opacity-50" />
-                          <p className="text-sm">No team members available</p>
+                          <p className="text-sm">No employees available</p>
                         </div>
                       ) : (
                         <div className="divide-y">
@@ -380,7 +426,7 @@ export function AssignTaskDialog() {
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Assign to {selectedUsers.length} User{selectedUsers.length !== 1 ? 's' : ''}</span>
+                    <span className="hidden sm:inline">Assign to {selectedUsers.length} Employee{selectedUsers.length !== 1 ? 's' : ''}</span>
                     <span className="sm:hidden">Assign ({selectedUsers.length})</span>
                   </>
                 )}
