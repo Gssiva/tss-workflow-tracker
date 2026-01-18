@@ -15,9 +15,10 @@ interface RecordCardProps {
   onEdit?: () => void;
   showUser?: boolean;
   showUpload?: boolean;
+  hideActions?: boolean;
 }
 
-export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = true }: RecordCardProps) {
+export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = true, hideActions = false }: RecordCardProps) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [loadingUrl, setLoadingUrl] = useState(false);
   const isBreached = record.breach_status;
@@ -127,28 +128,30 @@ export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = 
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-2 border-t flex-wrap">
-            {!isCompleted && (
-              <>
-                <Button size="sm" onClick={onComplete} className="gradient-primary text-primary-foreground">
-                  <CheckCircle2 className="mr-1 h-4 w-4" />
-                  Mark Complete
-                </Button>
-                <Button size="sm" variant="outline" onClick={onEdit}>
-                  <Edit2 className="mr-1 h-4 w-4" />
-                  Edit
-                </Button>
-              </>
-            )}
-            <RecordCommentsDialog recordId={record.id} recordTitle={record.title} />
-            {showUpload && (
-              <UploadDocumentDialog 
-                recordId={record.id} 
-                recordTitle={record.title}
-                currentFileUrl={record.file_url}
-              />
-            )}
-          </div>
+          {!hideActions && (
+            <div className="flex items-center gap-2 pt-2 border-t flex-wrap">
+              {!isCompleted && (
+                <>
+                  <Button size="sm" onClick={onComplete} className="gradient-primary text-primary-foreground">
+                    <CheckCircle2 className="mr-1 h-4 w-4" />
+                    Mark Complete
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={onEdit}>
+                    <Edit2 className="mr-1 h-4 w-4" />
+                    Edit
+                  </Button>
+                </>
+              )}
+              <RecordCommentsDialog recordId={record.id} recordTitle={record.title} />
+              {showUpload && (
+                <UploadDocumentDialog 
+                  recordId={record.id} 
+                  recordTitle={record.title}
+                  currentFileUrl={record.file_url}
+                />
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

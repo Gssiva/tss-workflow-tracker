@@ -97,14 +97,16 @@ export function AppSidebar() {
           <div className="text-sm">
             <p className="font-medium text-sidebar-foreground truncate">{user?.email}</p>
           </div>
-          <EditProfileDialog 
-            trigger={
-              <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
-                <Settings className="h-4 w-4" />
-                Edit Profile
-              </Button>
-            }
-          />
+          {!isStudent && (
+            <EditProfileDialog 
+              trigger={
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                  <Settings className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+              }
+            />
+          )}
           <Button
             variant="outline"
             size="sm"
