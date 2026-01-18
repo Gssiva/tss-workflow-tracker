@@ -12,7 +12,7 @@ export type Profile = {
 };
 
 export type UserWithRole = Profile & {
-  role: 'admin' | 'user' | null;
+  role: 'super_admin' | 'admin' | 'user' | 'student' | null;
 };
 
 export type Invitation = {
@@ -49,13 +49,13 @@ export function useUsers() {
         const userRole = roles.find((r) => r.user_id === profile.id);
         return {
           ...profile,
-          role: userRole?.role as 'admin' | 'user' | null,
+          role: userRole?.role as 'super_admin' | 'admin' | 'user' | 'student' | null,
         };
       });
 
       return usersWithRoles;
     },
-    enabled: role === 'admin',
+    enabled: role === 'admin' || role === 'super_admin',
   });
 
   const invitationsQuery = useQuery({
@@ -69,7 +69,7 @@ export function useUsers() {
       if (error) throw error;
       return data as Invitation[];
     },
-    enabled: role === 'admin',
+    enabled: role === 'admin' || role === 'super_admin',
   });
 
   const createInvitation = useMutation({
@@ -117,7 +117,7 @@ export function useUsers() {
   });
 
   const updateUserRole = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'admin' | 'user' }) => {
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'super_admin' | 'admin' | 'user' | 'student' }) => {
       // First, delete existing role
       await supabase
         .from('user_roles')

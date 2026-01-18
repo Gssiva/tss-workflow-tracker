@@ -140,6 +140,208 @@ export type Database = {
         }
         Relationships: []
       }
+      student_daily_uploads: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          student_id: string
+          upload_date: string
+          upload_type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          student_id: string
+          upload_date?: string
+          upload_type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          student_id?: string
+          upload_date?: string
+          upload_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_daily_uploads_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_test_assignments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          marks_obtained: number | null
+          status: string
+          student_id: string
+          test_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          marks_obtained?: number | null
+          status?: string
+          student_id: string
+          test_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          marks_obtained?: number | null
+          status?: string
+          student_id?: string
+          test_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_test_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_test_assignments_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "student_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_tests: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          max_marks: number | null
+          test_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          max_marks?: number | null
+          test_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          max_marks?: number | null
+          test_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_weekly_reports: {
+        Row: {
+          attendance_percentage: number | null
+          created_at: string
+          created_by: string | null
+          evening_uploads: number | null
+          id: string
+          morning_uploads: number | null
+          remarks: string | null
+          student_id: string
+          total_uploads: number | null
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          attendance_percentage?: number | null
+          created_at?: string
+          created_by?: string | null
+          evening_uploads?: number | null
+          id?: string
+          morning_uploads?: number | null
+          remarks?: string | null
+          student_id: string
+          total_uploads?: number | null
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          attendance_percentage?: number | null
+          created_at?: string
+          created_by?: string | null
+          evening_uploads?: number | null
+          id?: string
+          morning_uploads?: number | null
+          remarks?: string | null
+          student_id?: string
+          total_uploads?: number | null
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_weekly_reports_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          batch: string | null
+          course: string | null
+          created_at: string
+          id: string
+          phone: string | null
+          student_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch?: string | null
+          course?: string | null
+          created_at?: string
+          id?: string
+          phone?: string | null
+          student_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch?: string | null
+          course?: string | null
+          created_at?: string
+          id?: string
+          phone?: string | null
+          student_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_messages: {
         Row: {
           created_at: string
@@ -218,6 +420,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_any_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "super_admin" | "student"
