@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowRight, BarChart3, Clock, Shield } from 'lucide-react';
+import { ArrowRight, BarChart3, Clock, Shield, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import companyLogo from '@/assets/company-logo.png';
 
@@ -11,7 +11,13 @@ export default function Index() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate(role === 'admin' ? '/admin' : '/dashboard');
+      if (role === 'student') {
+        navigate('/student');
+      } else if (role === 'admin' || role === 'super_admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [user, role, loading, navigate]);
 
@@ -31,7 +37,14 @@ export default function Index() {
           </div>
           <h1 className="text-5xl font-bold text-foreground mb-6">TSS Tracker</h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Track your projects with automatic SLA monitoring. Know when tasks breach their expected completion time.</p>
-          <Button size="lg" className="gradient-primary text-lg px-8" onClick={() => navigate('/auth')}>Get Started <ArrowRight className="ml-2 h-5 w-5" /></Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button size="lg" className="gradient-primary text-lg px-8" onClick={() => navigate('/auth')}>
+              Employee Login <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => navigate('/student-auth')}>
+              <GraduationCap className="mr-2 h-5 w-5" /> Student Portal
+            </Button>
+          </div>
         </div>
       </div>
       <div className="container mx-auto px-6 py-24">
