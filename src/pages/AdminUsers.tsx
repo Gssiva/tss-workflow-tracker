@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { UserPlus, Mail, Trash2, Shield, User as UserIcon, Copy, Check } from 'lucide-react';
+import { UserPlus, Mail, Trash2, Shield, User as UserIcon, Copy, Check, Crown, GraduationCap } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -50,10 +51,13 @@ const inviteSchema = z.object({
 type InviteFormData = z.infer<typeof inviteSchema>;
 
 export default function AdminUsers() {
+  const { role: currentUserRole } = useAuth();
   const { users, invitations, isLoadingUsers, isLoadingInvitations, createInvitation, deleteInvitation, updateUserRole } =
     useUsers();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  
+  const isSuperAdmin = currentUserRole === 'super_admin';
 
   const form = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
@@ -171,37 +175,53 @@ export default function AdminUsers() {
                       <TableCell>
                         <Badge
                           className={
-                            user.role === 'admin'
+                            user.role === 'super_admin'
+                              ? 'bg-yellow-500 text-white'
+                              : user.role === 'admin'
                               ? 'bg-primary text-primary-foreground'
+                              : user.role === 'student'
+                              ? 'bg-green-500 text-white'
                               : 'bg-secondary text-secondary-foreground'
                           }
                         >
-                          {user.role === 'admin' ? (
+                          {user.role === 'super_admin' ? (
+                            <Crown className="mr-1 h-3 w-3" />
+                          ) : user.role === 'admin' ? (
                             <Shield className="mr-1 h-3 w-3" />
+                          ) : user.role === 'student' ? (
+                            <GraduationCap className="mr-1 h-3 w-3" />
                           ) : (
                             <UserIcon className="mr-1 h-3 w-3" />
                           )}
-                          {user.role === 'admin' ? 'Admin' : 'Employee'}
+                          {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(user.created_at), 'PP')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Select
-                          value={user.role || 'user'}
-                          onValueChange={(newRole) =>
-                            updateUserRole.mutate({ userId: user.id, newRole: newRole as 'admin' | 'user' })
-                          }
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="user">Employee</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        {isSuperAdmin ? (
+                          <Select
+                            value={user.role || 'user'}
+                            onValueChange={(newRole) =>
+                              updateUserRole.mutate({ userId: user.id, newRole: newRole as 'super_admin' | 'admin' | 'user' | 'student' })
+                            }
+                          >
+                            <SelectTrigger className="w-[130px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Employee</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="super_admin">Super Admin</SelectItem>
+                              <SelectItem value="student">Student</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
+                          </span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
