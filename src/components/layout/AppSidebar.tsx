@@ -28,17 +28,19 @@ export function AppSidebar() {
   const userMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/dashboard' },
     { title: 'My Records', icon: FileText, path: '/records' },
-    { title: 'Daily Work', icon: ImageIcon, path: '/daily-work' },
+    { title: 'Day Update', icon: ImageIcon, path: '/daily-work' },
   ];
 
   const studentMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/student' },
+    { title: 'My Records', icon: FileText, path: '/student/records' },
+    { title: 'Day Update', icon: ImageIcon, path: '/student/day-update' },
   ];
 
   const adminMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/admin' },
     { title: 'All Records', icon: FileText, path: '/admin/records' },
-    { title: 'Daily Work', icon: ImageIcon, path: '/admin/daily-work' },
+    { title: 'Day Update', icon: ImageIcon, path: '/admin/daily-work' },
     { title: 'Employees', icon: Users, path: '/admin/users' },
     { title: 'Students', icon: GraduationCap, path: '/admin/students' },
     { title: 'Employee Activity', icon: Activity, path: '/admin/activity' },

@@ -19,6 +19,8 @@ import AdminDailyWork from "./pages/AdminDailyWork";
 import AdminStudents from "./pages/AdminStudents";
 import UserDailyWork from "./pages/UserDailyWork";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentRecords from "./pages/StudentRecords";
+import StudentDayUpdate from "./pages/StudentDayUpdate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -66,6 +68,22 @@ const App = () => (
               element={
                 <ProtectedRoute requireStudent>
                   <StudentDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/records"
+              element={
+                <ProtectedRoute requireStudent>
+                  <StudentRecords />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/day-update"
+              element={
+                <ProtectedRoute requireStudent>
+                  <StudentDayUpdate />
                 </ProtectedRoute>
               }
             />

@@ -6,6 +6,7 @@ import { RecordCard } from '@/components/records/RecordCard';
 import { CreateRecordDialog } from '@/components/records/CreateRecordDialog';
 import { EditRecordDialog } from '@/components/records/EditRecordDialog';
 import { DailyWorkUploadDialog } from '@/components/dailywork/DailyWorkUploadDialog';
+import { IssueNotifications } from '@/components/dashboard/IssueNotifications';
 import { TeamChatbox } from '@/components/chat/TeamChatbox';
 import { useRecords, Record } from '@/hooks/useRecords';
 import { useDailyWorkUploads } from '@/hooks/useDailyWorkUploads';
@@ -42,6 +43,9 @@ export default function UserDashboard() {
   return (
     <AppLayout title="Dashboard">
       <div className="space-y-8">
+        {/* Issue Notifications */}
+        <IssueNotifications />
+
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard

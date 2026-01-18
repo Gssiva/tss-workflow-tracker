@@ -2,6 +2,7 @@ import { FileText, Users, CheckCircle2, AlertTriangle, Clock, TrendingUp, Activi
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { UserActivityCard } from '@/components/dashboard/UserActivityCard';
+import { IssueNotifications } from '@/components/dashboard/IssueNotifications';
 import { TeamChatbox } from '@/components/chat/TeamChatbox';
 import { useRecords } from '@/hooks/useRecords';
 import { useUsers } from '@/hooks/useUsers';
@@ -71,6 +72,9 @@ export default function AdminDashboard() {
   return (
     <AppLayout title="Dashboard">
       <div className="space-y-8">
+        {/* Issue Notifications */}
+        <IssueNotifications />
+
         {/* Welcome Section */}
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-semibold text-foreground">

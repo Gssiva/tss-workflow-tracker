@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStudents } from '@/hooks/useStudents';
 import { StudentUploadDialog } from '@/components/student/StudentUploadDialog';
+import { IssueNotifications } from '@/components/dashboard/IssueNotifications';
 import { TeamChatbox } from '@/components/chat/TeamChatbox';
 import { format, isToday } from 'date-fns';
 
@@ -68,6 +69,9 @@ export default function StudentDashboard() {
   return (
     <AppLayout title="Student Dashboard">
       <div className="space-y-8">
+        {/* Issue Notifications */}
+        <IssueNotifications />
+
         {/* Welcome Section */}
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-semibold text-foreground">

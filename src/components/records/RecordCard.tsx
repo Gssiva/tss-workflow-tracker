@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Record } from '@/hooks/useRecords';
 import { UploadDocumentDialog } from './UploadDocumentDialog';
+import { RecordCommentsDialog } from './RecordCommentsDialog';
 import { supabase } from '@/integrations/supabase/client';
+
 interface RecordCardProps {
   record: Record & { file_url?: string | null };
   onComplete?: () => void;
@@ -138,6 +140,7 @@ export function RecordCard({ record, onComplete, onEdit, showUser, showUpload = 
                 </Button>
               </>
             )}
+            <RecordCommentsDialog recordId={record.id} recordTitle={record.title} />
             {showUpload && (
               <UploadDocumentDialog 
                 recordId={record.id} 
