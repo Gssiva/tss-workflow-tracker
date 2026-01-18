@@ -58,6 +58,9 @@ export function useUsers() {
     enabled: role === 'admin' || role === 'super_admin',
   });
 
+  // Only super_admin can modify roles
+  const canModifyRoles = role === 'super_admin';
+
   const invitationsQuery = useQuery({
     queryKey: ['invitations'],
     queryFn: async () => {
@@ -154,5 +157,6 @@ export function useUsers() {
     createInvitation,
     deleteInvitation,
     updateUserRole,
+    canModifyRoles,
   };
 }

@@ -89,16 +89,18 @@ export default function AdminStudents() {
               Manage students, view uploads, and track progress
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowBulkUpload(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Bulk Register
-            </Button>
-            <Button onClick={() => setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Student
-            </Button>
-          </div>
+          {isSuperAdmin && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowBulkUpload(true)}>
+                <Upload className="h-4 w-4 mr-2" />
+                Bulk Register
+              </Button>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Student
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
