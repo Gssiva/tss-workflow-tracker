@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Key, Mail, Lock, User, Phone, GraduationCap } from 'lucide-react';
+import { Key, Mail, Lock, User, Phone, GraduationCap, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -41,11 +41,58 @@ type StudentSignupFormData = z.infer<typeof studentSignupSchema>;
 type StudentLoginFormData = z.infer<typeof studentLoginSchema>;
 
 export default function StudentAuth() {
-  const [step, setStep] = useState<'apikey' | 'choose' | 'signup' | 'login'>('apikey');
+  const [step, setStep] = useState<'apikey' | 'choose' | 'signup' | 'login' | 'auto-login'>('apikey');
   const [validatedApiKey, setValidatedApiKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [autoLoginMessage, setAutoLoginMessage] = useState('Verifying your credentials...');
   const { signIn, user, role } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Handle auto-login from external link
+  useEffect(() => {
+    const apiKey = searchParams.get('apikey');
+    const userEmail = searchParams.get('useremail');
+
+    if (apiKey && userEmail) {
+      setStep('auto-login');
+      handleAutoLogin(apiKey, userEmail);
+    }
+  }, [searchParams]);
+
+  const handleAutoLogin = async (apiKey: string, email: string) => {
+    try {
+      setAutoLoginMessage('Validating API key...');
+      
+      // Call edge function to verify student
+      const { data, error } = await supabase.functions.invoke('verify-student', {
+        body: { apiKey, email },
+      });
+
+      if (error || !data?.success) {
+        console.error('Auto-login failed:', error || data?.error);
+        toast.error(data?.error || 'Failed to verify student credentials');
+        setStep('apikey');
+        return;
+      }
+
+      setAutoLoginMessage('Logging you in...');
+
+      // If magic link is available, redirect to it
+      if (data.magicLink) {
+        window.location.href = data.magicLink;
+        return;
+      }
+
+      // Fallback: navigate to student dashboard
+      toast.success('Welcome! Redirecting to your dashboard...');
+      navigate('/student');
+    } catch (error) {
+      console.error('Auto-login error:', error);
+      toast.error('Failed to auto-login. Please try manual login.');
+      setStep('apikey');
+    }
+  };
 
   // Redirect if already logged in as student
   useEffect(() => {
@@ -511,6 +558,24 @@ export default function StudentAuth() {
                     </Button>
                   </form>
                 </Form>
+              </CardContent>
+            </>
+          )}
+
+          {step === 'auto-login' && (
+            <>
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                  Auto Login
+                </CardTitle>
+                <CardDescription>
+                  Please wait while we verify your credentials
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center py-8">
+                <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+                <p className="text-muted-foreground text-center">{autoLoginMessage}</p>
               </CardContent>
             </>
           )}
