@@ -16,7 +16,9 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminActivity from "./pages/AdminActivity";
 import AdminDailyWork from "./pages/AdminDailyWork";
+import AdminStudents from "./pages/AdminStudents";
 import UserDailyWork from "./pages/UserDailyWork";
+import StudentDashboard from "./pages/StudentDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +34,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             
-            {/* User Routes */}
+            {/* Employee Routes */}
             <Route
               path="/dashboard"
               element={
@@ -54,6 +56,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <UserDailyWork />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Student Routes */}
+            <Route
+              path="/student"
+              element={
+                <ProtectedRoute requireStudent>
+                  <StudentDashboard />
                 </ProtectedRoute>
               }
             />
@@ -80,6 +92,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/students"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminStudents />
                 </ProtectedRoute>
               }
             />
