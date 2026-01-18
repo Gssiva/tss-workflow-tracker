@@ -178,6 +178,33 @@ export type Database = {
         }
         Relationships: []
       }
+      student_api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       student_daily_uploads: {
         Row: {
           created_at: string
@@ -353,6 +380,7 @@ export type Database = {
           course: string | null
           created_at: string
           id: string
+          is_profile_complete: boolean
           phone: string | null
           student_id: string
           updated_at: string
@@ -363,6 +391,7 @@ export type Database = {
           course?: string | null
           created_at?: string
           id?: string
+          is_profile_complete?: boolean
           phone?: string | null
           student_id: string
           updated_at?: string
@@ -373,6 +402,7 @@ export type Database = {
           course?: string | null
           created_at?: string
           id?: string
+          is_profile_complete?: boolean
           phone?: string | null
           student_id?: string
           updated_at?: string

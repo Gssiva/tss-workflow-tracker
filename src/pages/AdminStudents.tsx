@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Upload, Plus, Trash2, Search, GraduationCap, Eye } from 'lucide-react';
+import { Users, Trash2, Search, GraduationCap, Eye, Key } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,29 +14,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import { useStudents } from '@/hooks/useStudents';
 import { useAuth } from '@/hooks/useAuth';
-import { CreateStudentDialog } from '@/components/admin/CreateStudentDialog';
-import { BulkStudentUploadDialog } from '@/components/admin/BulkStudentUploadDialog';
 import { StudentUploadsViewDialog } from '@/components/admin/StudentUploadsViewDialog';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+
+const STUDENT_API_KEY = 'APIKEY-TSS-STUDENT-TRACKER-9f8a7b6c5d4e';
 
 export default function AdminStudents() {
   const { role } = useAuth();
   const { students, isLoadingStudents, deleteStudent } = useStudents();
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [showUploadsDialog, setShowUploadsDialog] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   const isSuperAdmin = role === 'super_admin';
 
@@ -64,6 +56,13 @@ export default function AdminStudents() {
     setShowUploadsDialog(true);
   };
 
+  const copyApiKey = async () => {
+    await navigator.clipboard.writeText(STUDENT_API_KEY);
+    setCopiedKey(true);
+    toast.success('API Key copied to clipboard!');
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
   if (isLoadingStudents) {
     return (
       <AppLayout title="Students">
@@ -86,22 +85,37 @@ export default function AdminStudents() {
               Student Management
             </h2>
             <p className="text-muted-foreground">
-              Manage students, view uploads, and track progress
+              View students and track their progress
             </p>
           </div>
-          {isSuperAdmin && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowBulkUpload(true)}>
-                <Upload className="h-4 w-4 mr-2" />
-                Bulk Register
-              </Button>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Student
-              </Button>
-            </div>
-          )}
         </div>
+
+        {/* API Key Card */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-primary/10">
+                  <Key className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">Student Access Key</p>
+                  <p className="text-sm text-muted-foreground">
+                    Share this key with students to allow them to register
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="px-3 py-2 bg-muted rounded-md text-sm font-mono">
+                  {STUDENT_API_KEY}
+                </code>
+                <Button variant="outline" size="sm" onClick={copyApiKey}>
+                  {copiedKey ? '✓ Copied' : 'Copy'}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-3">
@@ -171,6 +185,9 @@ export default function AdminStudents() {
               <div className="text-center py-12">
                 <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">No students found</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Share the API key with students to allow them to register
+                </p>
               </div>
             ) : (
               <Table>
@@ -228,8 +245,6 @@ export default function AdminStudents() {
         </Card>
       </div>
 
-      <CreateStudentDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
-      <BulkStudentUploadDialog open={showBulkUpload} onOpenChange={setShowBulkUpload} />
       <StudentUploadsViewDialog
         open={showUploadsDialog}
         onOpenChange={setShowUploadsDialog}
