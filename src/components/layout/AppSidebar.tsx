@@ -1,4 +1,4 @@
-import { Home, FileText, Users, BarChart3, LogOut, Settings, Activity, Image as ImageIcon } from 'lucide-react';
+import { Home, FileText, Users, BarChart3, LogOut, Settings, Activity, Image as ImageIcon, GraduationCap } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -22,7 +22,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isAdmin = role === 'admin';
+  const isAdmin = role === 'admin' || role === 'super_admin';
+  const isStudent = role === 'student';
 
   const userMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/dashboard' },
@@ -30,16 +31,21 @@ export function AppSidebar() {
     { title: 'Daily Work', icon: ImageIcon, path: '/daily-work' },
   ];
 
+  const studentMenuItems = [
+    { title: 'Dashboard', icon: Home, path: '/student' },
+  ];
+
   const adminMenuItems = [
     { title: 'Dashboard', icon: Home, path: '/admin' },
     { title: 'All Records', icon: FileText, path: '/admin/records' },
     { title: 'Daily Work', icon: ImageIcon, path: '/admin/daily-work' },
     { title: 'Employees', icon: Users, path: '/admin/users' },
+    { title: 'Students', icon: GraduationCap, path: '/admin/students' },
     { title: 'Employee Activity', icon: Activity, path: '/admin/activity' },
     { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   ];
 
-  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
+  const menuItems = isAdmin ? adminMenuItems : isStudent ? studentMenuItems : userMenuItems;
 
   const handleSignOut = async () => {
     await signOut();
