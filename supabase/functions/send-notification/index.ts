@@ -8,6 +8,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escape function to prevent XSS attacks
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 interface NotificationRequest {
   type: "task_assigned" | "task_assigned_admin" | "task_completed" | "daily_work_uploaded";
   recipientEmail?: string;
@@ -49,18 +59,25 @@ const handler = async (req: Request): Promise<Response> => {
     if (type === "task_assigned") {
       const { recipientEmail, recipientName, taskTitle, taskDescription, expectedTimeHours, assignedBy } = body;
       toEmail = recipientEmail || "";
-      subject = `New Task Assigned: ${taskTitle}`;
+      
+      // Sanitize all user inputs
+      const safeRecipientName = escapeHtml(recipientName || '');
+      const safeTaskTitle = escapeHtml(taskTitle || '');
+      const safeTaskDescription = escapeHtml(taskDescription || '');
+      const safeAssignedBy = escapeHtml(assignedBy || '');
+      
+      subject = `New Task Assigned: ${safeTaskTitle}`;
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #333;">New Task Assigned to You</h2>
-          <p>Hello${recipientName ? ` ${recipientName}` : ''},</p>
+          <p>Hello${safeRecipientName ? ` ${safeRecipientName}` : ''},</p>
           <p>A new task has been assigned to you:</p>
           <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #333;">${taskTitle}</h3>
-            ${taskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${taskDescription}</p>` : ''}
+            <h3 style="margin: 0 0 10px 0; color: #333;">${safeTaskTitle}</h3>
+            ${safeTaskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${safeTaskDescription}</p>` : ''}
             ${expectedTimeHours ? `<p style="margin: 0; color: #666;"><strong>Expected completion time:</strong> ${expectedTimeHours} hours</p>` : ''}
           </div>
-          ${assignedBy ? `<p style="color: #888; font-size: 14px;">Assigned by: ${assignedBy}</p>` : ''}
+          ${safeAssignedBy ? `<p style="color: #888; font-size: 14px;">Assigned by: ${safeAssignedBy}</p>` : ''}
           <p>Please log in to your account to view and complete this task.</p>
           <p style="color: #888; font-size: 12px; margin-top: 30px;">This is an automated notification from TSS Tracker.</p>
         </div>
@@ -68,18 +85,24 @@ const handler = async (req: Request): Promise<Response> => {
     } else if (type === "task_assigned_admin") {
       const { recipientEmail, recipientName, taskTitle, taskDescription, expectedTimeHours, assignedToNames } = body;
       toEmail = recipientEmail || "";
-      subject = `Task Assignment Update: ${taskTitle}`;
-      const assigneesList = assignedToNames?.join(', ') || 'employees';
+      
+      // Sanitize all user inputs
+      const safeRecipientName = escapeHtml(recipientName || '');
+      const safeTaskTitle = escapeHtml(taskTitle || '');
+      const safeTaskDescription = escapeHtml(taskDescription || '');
+      const safeAssigneesList = (assignedToNames || []).map(escapeHtml).join(', ') || 'employees';
+      
+      subject = `Task Assignment Update: ${safeTaskTitle}`;
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2563eb;">Task Assignment Notification</h2>
-          <p>Hello${recipientName ? ` ${recipientName}` : ' Admin'},</p>
+          <p>Hello${safeRecipientName ? ` ${safeRecipientName}` : ' Admin'},</p>
           <p>A new task has been assigned to the following employees:</p>
           <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2563eb;">
-            <h3 style="margin: 0 0 10px 0; color: #333;">${taskTitle}</h3>
-            ${taskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${taskDescription}</p>` : ''}
+            <h3 style="margin: 0 0 10px 0; color: #333;">${safeTaskTitle}</h3>
+            ${safeTaskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${safeTaskDescription}</p>` : ''}
             ${expectedTimeHours ? `<p style="margin: 0 0 10px 0; color: #666;"><strong>Expected completion time:</strong> ${expectedTimeHours} hours</p>` : ''}
-            <p style="margin: 0; color: #333;"><strong>Assigned to:</strong> ${assigneesList}</p>
+            <p style="margin: 0; color: #333;"><strong>Assigned to:</strong> ${safeAssigneesList}</p>
           </div>
           <p>Please log in to the admin dashboard to track progress.</p>
           <p style="color: #888; font-size: 12px; margin-top: 30px;">This is an automated notification from TSS Tracker.</p>
@@ -88,17 +111,23 @@ const handler = async (req: Request): Promise<Response> => {
     } else if (type === "task_completed") {
       const { recipientEmail, taskTitle, taskDescription, completedBy } = body;
       toEmail = recipientEmail || "";
-      subject = `Task Completed: ${taskTitle}`;
+      
+      // Sanitize all user inputs
+      const safeTaskTitle = escapeHtml(taskTitle || '');
+      const safeTaskDescription = escapeHtml(taskDescription || '');
+      const safeCompletedBy = escapeHtml(completedBy || '');
+      
+      subject = `Task Completed: ${safeTaskTitle}`;
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #28a745;">Task Completed</h2>
           <p>Hello Admin,</p>
           <p>A task has been marked as complete:</p>
           <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #333;">${taskTitle}</h3>
-            ${taskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${taskDescription}</p>` : ''}
+            <h3 style="margin: 0 0 10px 0; color: #333;">${safeTaskTitle}</h3>
+            ${safeTaskDescription ? `<p style="margin: 0 0 10px 0; color: #666;">${safeTaskDescription}</p>` : ''}
           </div>
-          ${completedBy ? `<p style="color: #666;"><strong>Completed by:</strong> ${completedBy}</p>` : ''}
+          ${safeCompletedBy ? `<p style="color: #666;"><strong>Completed by:</strong> ${safeCompletedBy}</p>` : ''}
           <p>Please log in to review the completed task.</p>
           <p style="color: #888; font-size: 12px; margin-top: 30px;">This is an automated notification from TSS Tracker.</p>
         </div>
@@ -106,18 +135,25 @@ const handler = async (req: Request): Promise<Response> => {
     } else if (type === "daily_work_uploaded") {
       const { to, uploaderName, mentionedUsers, imageUrl } = body;
       toEmail = to || "";
-      subject = `Daily Work Upload: ${uploaderName}`;
-      const mentionedList = mentionedUsers && mentionedUsers.length > 0 
-        ? `<p><strong>Also working:</strong> ${mentionedUsers.join(', ')}</p>` 
+      
+      // Sanitize all user inputs
+      const safeUploaderName = escapeHtml(uploaderName || '');
+      const safeMentionedList = (mentionedUsers || []).map(escapeHtml);
+      // Validate and sanitize URL - only allow https URLs
+      const safeImageUrl = imageUrl && imageUrl.startsWith('https://') ? imageUrl : '';
+      
+      subject = `Daily Work Upload: ${safeUploaderName}`;
+      const mentionedListHtml = safeMentionedList.length > 0 
+        ? `<p><strong>Also working:</strong> ${safeMentionedList.join(', ')}</p>` 
         : '';
       htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2563eb;">Daily Work Image Uploaded</h2>
           <p>Hello Admin,</p>
-          <p><strong>${uploaderName}</strong> has uploaded their daily work image.</p>
-          ${mentionedList}
+          <p><strong>${safeUploaderName}</strong> has uploaded their daily work image.</p>
+          ${mentionedListHtml}
           <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <a href="${imageUrl}" style="color: #2563eb;">View uploaded image</a>
+            ${safeImageUrl ? `<a href="${safeImageUrl}" style="color: #2563eb;">View uploaded image</a>` : '<p>Image link unavailable</p>'}
           </div>
           <p>Please log in to the admin dashboard to view all daily work uploads.</p>
           <p style="color: #888; font-size: 12px; margin-top: 30px;">This is an automated notification from TSS Tracker.</p>
