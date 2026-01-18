@@ -2,17 +2,14 @@ import { useState } from 'react';
 import { Search, FileText } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { RecordCard } from '@/components/records/RecordCard';
-import { CreateRecordDialog } from '@/components/records/CreateRecordDialog';
-import { EditRecordDialog } from '@/components/records/EditRecordDialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useRecords, Record } from '@/hooks/useRecords';
+import { useRecords } from '@/hooks/useRecords';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TeamChatbox } from '@/components/chat/TeamChatbox';
 
 export default function StudentRecords() {
-  const { records, isLoading, markComplete } = useRecords();
-  const [editingRecord, setEditingRecord] = useState<Record | null>(null);
+  const { records, isLoading } = useRecords();
   const [search, setSearch] = useState('');
 
   const filteredRecords = records.filter(
@@ -50,7 +47,6 @@ export default function StudentRecords() {
               className="pl-10"
             />
           </div>
-          <CreateRecordDialog />
         </div>
 
         {/* Tabs */}
@@ -73,8 +69,7 @@ export default function StudentRecords() {
                   <RecordCard
                     key={record.id}
                     record={record}
-                    onComplete={() => markComplete.mutate(record.id)}
-                    onEdit={() => setEditingRecord(record)}
+                    hideActions
                   />
                 ))}
               </div>
@@ -92,8 +87,7 @@ export default function StudentRecords() {
                   <RecordCard
                     key={record.id}
                     record={record}
-                    onComplete={() => markComplete.mutate(record.id)}
-                    onEdit={() => setEditingRecord(record)}
+                    hideActions
                   />
                 ))}
               </div>
@@ -111,8 +105,7 @@ export default function StudentRecords() {
                   <RecordCard
                     key={record.id}
                     record={record}
-                    onComplete={() => markComplete.mutate(record.id)}
-                    onEdit={() => setEditingRecord(record)}
+                    hideActions
                   />
                 ))}
               </div>
@@ -121,11 +114,6 @@ export default function StudentRecords() {
         </Tabs>
       </div>
 
-      <EditRecordDialog
-        record={editingRecord}
-        open={!!editingRecord}
-        onOpenChange={(open) => !open && setEditingRecord(null)}
-      />
       
       <TeamChatbox />
     </AppLayout>
