@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import StudentAuth from "./pages/StudentAuth";
 import UserDashboard from "./pages/UserDashboard";
 import UserRecords from "./pages/UserRecords";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -35,6 +36,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/student-auth" element={<StudentAuth />} />
             
             {/* Employee Routes */}
             <Route
