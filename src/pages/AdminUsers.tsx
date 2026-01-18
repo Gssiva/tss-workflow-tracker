@@ -99,47 +99,49 @@ export default function AdminUsers() {
               <CardTitle>Employees</CardTitle>
               <CardDescription>{users.length} registered employees</CardDescription>
             </div>
-            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-              <DialogTrigger asChild>
-                <Button className="gradient-primary">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Invite Employee
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Invite New Employee</DialogTitle>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onInvite)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                              <Input className="pl-10" placeholder="user@example.com" {...field} />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setInviteOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={createInvitation.isPending}>
-                        {createInvitation.isPending ? 'Sending...' : 'Send Invitation'}
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
+            {isSuperAdmin && (
+              <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gradient-primary">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Invite Employee
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Invite New Employee</DialogTitle>
+                  </DialogHeader>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onInvite)} className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-10" placeholder="user@example.com" {...field} />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setInviteOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={createInvitation.isPending}>
+                          {createInvitation.isPending ? 'Sending...' : 'Send Invitation'}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            )}
           </CardHeader>
           <CardContent>
             <Table>

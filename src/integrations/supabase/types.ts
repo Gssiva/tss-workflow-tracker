@@ -98,6 +98,44 @@ export type Database = {
         }
         Relationships: []
       }
+      record_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          is_issue: boolean
+          record_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          is_issue?: boolean
+          record_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          is_issue?: boolean
+          record_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_comments_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       records: {
         Row: {
           breach_status: boolean
