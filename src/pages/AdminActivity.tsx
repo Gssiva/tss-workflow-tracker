@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { 
   Eye, 
@@ -17,10 +17,10 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { motion, Variants } from 'framer-motion';
 
 interface ActivityLog {
   id: string;
@@ -64,6 +64,19 @@ const actionColors: Record<string, string> = {
   record_edited: 'bg-warning/10 text-warning',
   document_uploaded: 'bg-purple-500/10 text-purple-500',
   profile_updated: 'bg-cyan-500/10 text-cyan-500',
+};
+
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
 };
 
 export default function AdminActivity() {
@@ -165,104 +178,123 @@ export default function AdminActivity() {
 
   return (
     <AppLayout title="User Activity">
-      <div className="space-y-6">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="space-y-6"
+      >
         {/* Filters */}
-        <Card className="border shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by user or page..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+        <motion.div variants={fadeInUp}>
+          <Card className="border shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by user or page..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Select value={actionFilter} onValueChange={setActionFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filter by action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    {uniqueActions.map(action => (
+                      <SelectItem key={action} value={action}>
+                        {actionLabels[action] || action}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={actionFilter} onValueChange={setActionFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by action" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  {uniqueActions.map(action => (
-                    <SelectItem key={action} value={action}>
-                      {actionLabels[action] || action}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Activity List */}
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-              <Activity className="h-5 w-5 text-primary" />
-              Activity Log ({filteredLogs.length} entries)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {filteredLogs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Activity className="h-12 w-12 text-muted-foreground/30 mb-3" />
-                <p className="text-muted-foreground">No activity found</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredLogs.map((log) => {
-                  const Icon = actionIcons[log.action] || Activity;
-                  const label = actionLabels[log.action] || log.action;
-                  const colorClass = actionColors[log.action] || 'bg-muted text-muted-foreground';
+        <motion.div variants={fadeInUp}>
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                <Activity className="h-5 w-5 text-primary" />
+                Activity Log ({filteredLogs.length} entries)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {filteredLogs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Activity className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">No activity found</p>
+                </div>
+              ) : (
+                <motion.div 
+                  variants={staggerContainer}
+                  className="space-y-2"
+                >
+                  {filteredLogs.map((log, index) => {
+                    const Icon = actionIcons[log.action] || Activity;
+                    const label = actionLabels[log.action] || log.action;
+                    const colorClass = actionColors[log.action] || 'bg-muted text-muted-foreground';
 
-                  return (
-                    <div 
-                      key={log.id} 
-                      className="flex items-center gap-4 p-4 rounded-xl border hover:bg-muted/50 transition-colors"
-                    >
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-full ${colorClass}`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-foreground">
-                            {log.user_name || log.user_email?.split('@')[0] || 'Unknown user'}
+                    return (
+                      <motion.div 
+                        key={log.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                        whileHover={{ x: 5, backgroundColor: 'hsl(var(--muted)/0.5)' }}
+                        className="flex items-center gap-4 p-4 rounded-xl border transition-colors cursor-pointer"
+                      >
+                        <motion.div 
+                          className={`flex h-12 w-12 items-center justify-center rounded-full ${colorClass}`}
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                        >
+                          <Icon className="h-6 w-6" />
+                        </motion.div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-foreground">
+                              {log.user_name || log.user_email?.split('@')[0] || 'Unknown user'}
+                            </p>
+                            <Badge variant="secondary" className="text-xs">
+                              {label}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {log.user_email}
                           </p>
-                          <Badge variant="secondary" className="text-xs">
-                            {label}
-                          </Badge>
+                          {log.page && (
+                            <p className="text-sm text-primary mt-1">
+                              Page: {log.page}
+                            </p>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {log.user_email}
-                        </p>
-                        {log.page && (
-                          <p className="text-sm text-primary mt-1">
-                            Page: {log.page}
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-medium text-foreground">
+                            {format(new Date(log.created_at), 'MMM d, yyyy')}
                           </p>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-medium text-foreground">
-                          {format(new Date(log.created_at), 'MMM d, yyyy')}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(log.created_at), 'h:mm a')}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(log.created_at), 'h:mm a')}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </AppLayout>
   );
 }

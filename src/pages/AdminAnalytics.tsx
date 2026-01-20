@@ -20,6 +20,20 @@ import {
   Line,
   Legend,
 } from 'recharts';
+import { motion, Variants } from 'framer-motion';
+
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 }
+  }
+};
 
 export default function AdminAnalytics() {
   const { records, isLoading: recordsLoading } = useRecords();
@@ -116,105 +130,83 @@ export default function AdminAnalytics() {
 
   return (
     <AppLayout title="Analytics">
-      <div className="grid gap-6 md:grid-cols-2">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="grid gap-6 md:grid-cols-2"
+      >
         {/* Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Status Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {statusData.length === 0 ? (
-              <div className="h-64 flex items-center justify-center text-muted-foreground">
-                No data available
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeInUp} whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Status Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {statusData.length === 0 ? (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  No data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Records by Expected Time */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Records by Expected Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={recordsByTime}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="text-muted-foreground" />
-                <YAxis className="text-muted-foreground" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Bar dataKey="value" fill="hsl(262, 83%, 58%)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeInUp} whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }}>
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Records by Expected Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={recordsByTime}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="name" className="text-muted-foreground" />
+                  <YAxis className="text-muted-foreground" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Bar dataKey="value" fill="hsl(262, 83%, 58%)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Daily Trends */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Daily Trends (Last 7 Days)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={dailyTrends}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="text-muted-foreground" />
-                <YAxis className="text-muted-foreground" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="created" stroke="hsl(262, 83%, 58%)" strokeWidth={2} name="Created" />
-                <Line type="monotone" dataKey="completed" stroke="hsl(142, 76%, 36%)" strokeWidth={2} name="Completed" />
-                <Line type="monotone" dataKey="breached" stroke="hsl(0, 84%, 60%)" strokeWidth={2} name="Breached" />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* User Comparison */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>User Performance Comparison</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {userComparison.length === 0 ? (
-              <div className="h-64 flex items-center justify-center text-muted-foreground">
-                No user data available
-              </div>
-            ) : (
+        <motion.div variants={fadeInUp} whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }} className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Daily Trends (Last 7 Days)</CardTitle>
+            </CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={userComparison}>
+                <LineChart data={dailyTrends}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="name" className="text-muted-foreground" />
                   <YAxis className="text-muted-foreground" />
@@ -226,14 +218,49 @@ export default function AdminAnalytics() {
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="completed" stackId="a" fill="hsl(142, 76%, 36%)" name="Completed" />
-                  <Bar dataKey="breached" stackId="a" fill="hsl(0, 84%, 60%)" name="Breached" />
-                </BarChart>
+                  <Line type="monotone" dataKey="created" stroke="hsl(262, 83%, 58%)" strokeWidth={2} name="Created" />
+                  <Line type="monotone" dataKey="completed" stroke="hsl(142, 76%, 36%)" strokeWidth={2} name="Completed" />
+                  <Line type="monotone" dataKey="breached" stroke="hsl(0, 84%, 60%)" strokeWidth={2} name="Breached" />
+                </LineChart>
               </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* User Comparison */}
+        <motion.div variants={fadeInUp} whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 300 }} className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Performance Comparison</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {userComparison.length === 0 ? (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  No user data available
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={userComparison}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="name" className="text-muted-foreground" />
+                    <YAxis className="text-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="completed" stackId="a" fill="hsl(142, 76%, 36%)" name="Completed" />
+                    <Bar dataKey="breached" stackId="a" fill="hsl(0, 84%, 60%)" name="Breached" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </AppLayout>
   );
 }
