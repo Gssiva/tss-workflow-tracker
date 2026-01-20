@@ -5,6 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const VALID_API_KEY = 'APIKEY-TSS-STUDENT-TRACKER-9f8a7b6c5d4e';
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,37 +25,34 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate API key
+    if (apiKey !== VALID_API_KEY) {
+      console.log('Invalid API key provided');
+      return new Response(
+        JSON.stringify({ error: 'Invalid API key' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Validate API key
-    const { data: keyData, error: keyError } = await supabase
-      .from('student_api_keys')
-      .select('api_key, is_active')
-      .eq('api_key', apiKey)
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (keyError || !keyData) {
-      console.log('Invalid API key:', keyError?.message);
-      return new Response(
-        JSON.stringify({ error: 'Invalid or inactive API key' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Fetch student details from external API
+    // Fetch student details from external API (POST request with body)
     console.log('Fetching student details from external API...');
-    const externalResponse = await fetch(
-      `https://tssplatform.onrender.com/getStudentByEmail?email=${encodeURIComponent(email)}`
-    );
+    const externalResponse = await fetch('https://tssplatform.onrender.com/getStudentByEmail', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
 
     if (!externalResponse.ok) {
       console.log('External API returned error:', externalResponse.status);
       return new Response(
-        JSON.stringify({ error: 'Student not found in external system' }),
+        JSON.stringify({ error: 'Student not found in TSS platform. Please ensure you are registered.' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -63,7 +62,7 @@ Deno.serve(async (req) => {
 
     if (!studentData || !studentData.email) {
       return new Response(
-        JSON.stringify({ error: 'Invalid student data from external system' }),
+        JSON.stringify({ error: 'Invalid student data from TSS platform' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -73,14 +72,13 @@ Deno.serve(async (req) => {
     const existingUser = existingUsers?.users?.find(u => u.email === email);
 
     let userId: string;
-    let tempPassword: string | null = null;
 
     if (existingUser) {
       console.log('User already exists:', existingUser.id);
       userId = existingUser.id;
     } else {
       // Generate a temporary password for new users
-      tempPassword = `TSS_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      const tempPassword = `TSS_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       
       console.log('Creating new user...');
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
@@ -109,10 +107,10 @@ Deno.serve(async (req) => {
         full_name: studentData.name || studentData.fullName || email.split('@')[0],
       });
 
-      // Create student record
+      // Create student record with external studentId
       const { error: studentError } = await supabase.from('students').insert({
         user_id: userId,
-        student_id: studentData.studentId || studentData.student_id || `STU_${Date.now()}`,
+        student_id: studentData._id || studentData.studentId || `STU_${Date.now()}`,
         batch: studentData.batch || null,
         course: studentData.course || null,
         phone: studentData.phone || null,
@@ -134,8 +132,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Generate a magic link or sign in the user
-    // Since we need to auto-login, we'll generate a sign-in token
+    // Generate a magic link for auto-login
     const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email: email,
@@ -161,7 +158,6 @@ Deno.serve(async (req) => {
         email,
         studentData,
         magicLink: signInData.properties?.action_link,
-        hashed_token: signInData.properties?.hashed_token,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
