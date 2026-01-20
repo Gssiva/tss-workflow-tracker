@@ -43,12 +43,26 @@ import {
 import { useUsers } from '@/hooks/useUsers';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { motion, Variants } from 'framer-motion';
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
 });
 
 type InviteFormData = z.infer<typeof inviteSchema>;
+
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
 
 export default function AdminUsers() {
   const { role: currentUserRole } = useAuth();
@@ -91,203 +105,233 @@ export default function AdminUsers() {
 
   return (
     <AppLayout title="Employee Management">
-      <div className="space-y-8">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="space-y-8"
+      >
         {/* Employees Table */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Employees</CardTitle>
-              <CardDescription>{users.length} registered employees</CardDescription>
-            </div>
-            {isSuperAdmin && (
-              <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gradient-primary">
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Invite Employee
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Invite New Employee</DialogTitle>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onInvite)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Address</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input className="pl-10" placeholder="user@example.com" {...field} />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setInviteOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit" disabled={createInvitation.isPending}>
-                          {createInvitation.isPending ? 'Sending...' : 'Send Invitation'}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      No employees yet
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                            <UserIcon className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{user.full_name || 'No name'}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            user.role === 'super_admin'
-                              ? 'bg-yellow-500 text-white'
-                              : user.role === 'admin'
-                              ? 'bg-primary text-primary-foreground'
-                              : user.role === 'student'
-                              ? 'bg-green-500 text-white'
-                              : 'bg-secondary text-secondary-foreground'
-                          }
-                        >
-                          {user.role === 'super_admin' ? (
-                            <Crown className="mr-1 h-3 w-3" />
-                          ) : user.role === 'admin' ? (
-                            <Shield className="mr-1 h-3 w-3" />
-                          ) : user.role === 'student' ? (
-                            <GraduationCap className="mr-1 h-3 w-3" />
-                          ) : (
-                            <UserIcon className="mr-1 h-3 w-3" />
+        <motion.div variants={fadeInUp}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Employees</CardTitle>
+                <CardDescription>{users.length} registered employees</CardDescription>
+              </div>
+              {isSuperAdmin && (
+                <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+                  <DialogTrigger asChild>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button className="gradient-primary">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Invite Employee
+                      </Button>
+                    </motion.div>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Invite New Employee</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onInvite)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email Address</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                  <Input className="pl-10" placeholder="user@example.com" {...field} />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
                           )}
-                          {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(user.created_at), 'PP')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {isSuperAdmin ? (
-                          <Select
-                            value={user.role || 'user'}
-                            onValueChange={(newRole) =>
-                              updateUserRole.mutate({ userId: user.id, newRole: newRole as 'super_admin' | 'admin' | 'user' | 'student' })
-                            }
-                          >
-                            <SelectTrigger className="w-[130px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="user">Employee</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="super_admin">Super Admin</SelectItem>
-                              <SelectItem value="student">Student</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Pending Invitations */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Invitations</CardTitle>
-            <CardDescription>{pendingInvitations.length} pending invitations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {pendingInvitations.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">No pending invitations</p>
-            ) : (
+                        />
+                        <div className="flex justify-end gap-2">
+                          <Button type="button" variant="outline" onClick={() => setInviteOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" disabled={createInvitation.isPending}>
+                            {createInvitation.isPending ? 'Sending...' : 'Send Invitation'}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Expires</TableHead>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pendingInvitations.map((inv) => (
-                    <TableRow key={inv.id}>
-                      <TableCell className="font-medium">{inv.email}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(inv.expires_at), 'PPp')}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => copyInviteLink(inv.token)}
-                          >
-                            {copiedToken === inv.token ? (
-                              <Check className="h-4 w-4" />
-                            ) : (
-                              <Copy className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteInvitation.mutate(inv.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  {users.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        No employees yet
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    users.map((user, index) => (
+                      <motion.tr
+                        key={user.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b transition-colors hover:bg-muted/50"
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <motion.div 
+                              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10"
+                              whileHover={{ scale: 1.1, rotate: 5 }}
+                            >
+                              <UserIcon className="h-4 w-4 text-primary" />
+                            </motion.div>
+                            <div>
+                              <p className="font-medium">{user.full_name || 'No name'}</p>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              user.role === 'super_admin'
+                                ? 'bg-yellow-500 text-white'
+                                : user.role === 'admin'
+                                ? 'bg-primary text-primary-foreground'
+                                : user.role === 'student'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-secondary text-secondary-foreground'
+                            }
+                          >
+                            {user.role === 'super_admin' ? (
+                              <Crown className="mr-1 h-3 w-3" />
+                            ) : user.role === 'admin' ? (
+                              <Shield className="mr-1 h-3 w-3" />
+                            ) : user.role === 'student' ? (
+                              <GraduationCap className="mr-1 h-3 w-3" />
+                            ) : (
+                              <UserIcon className="mr-1 h-3 w-3" />
+                            )}
+                            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {format(new Date(user.created_at), 'PP')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isSuperAdmin ? (
+                            <Select
+                              value={user.role || 'user'}
+                              onValueChange={(newRole) =>
+                                updateUserRole.mutate({ userId: user.id, newRole: newRole as 'super_admin' | 'admin' | 'user' | 'student' })
+                              }
+                            >
+                              <SelectTrigger className="w-[130px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="user">Employee</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="super_admin">Super Admin</SelectItem>
+                                <SelectItem value="student">Student</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : user.role === 'student' ? 'Student' : 'Employee'}
+                            </span>
+                          )}
+                        </TableCell>
+                      </motion.tr>
+                    ))
+                  )}
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Pending Invitations */}
+        <motion.div variants={fadeInUp}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Invitations</CardTitle>
+              <CardDescription>{pendingInvitations.length} pending invitations</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pendingInvitations.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">No pending invitations</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Expires</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingInvitations.map((inv, index) => (
+                      <motion.tr 
+                        key={inv.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b transition-colors hover:bg-muted/50"
+                      >
+                        <TableCell className="font-medium">{inv.email}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {format(new Date(inv.expires_at), 'PPp')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => copyInviteLink(inv.token)}
+                              >
+                                {copiedToken === inv.token ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </motion.div>
+                            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteInvitation.mutate(inv.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </motion.div>
+                          </div>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </AppLayout>
   );
 }

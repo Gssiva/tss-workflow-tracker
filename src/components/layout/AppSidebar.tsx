@@ -43,7 +43,6 @@ export function AppSidebar() {
     { title: 'Day Update', icon: ImageIcon, path: '/admin/daily-work' },
     { title: 'Employees', icon: Users, path: '/admin/users' },
     { title: 'Students', icon: GraduationCap, path: '/admin/students' },
-    { title: 'Student Tracker', icon: GraduationCap, path: '/student-auth', isExternal: true },
     { title: 'Employee Activity', icon: Activity, path: '/admin/activity' },
     { title: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   ];
